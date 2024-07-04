@@ -29,9 +29,9 @@ with tab as (
                 medium in (
                     'cpc', 'cpm', 'cpa', 'youtube', 'cpp', 'tg', 'social'
                 )
-                or source in (
-                    'cpc', 'cpm', 'cpa', 'youtube', 'cpp', 'tg', 'social'
-                )
+--                or source in (
+--                    'cpc', 'cpm', 'cpa', 'youtube', 'cpp', 'tg', 'social'
+--                )
         ) as s
     where visit_date = last_visit
 )
