@@ -27,7 +27,7 @@ with tab as (
             from sessions as s
             where
                 medium in (
-                    'cpc', 'cpm', 'cpa', 'youtube', 'cpp', 'tg', 'social'
+                    'cpc', 'cpa', 'cpm', 'youtube', 'cpp', 'tg', 'social'
                 )
 --                or source in (
 --                    'cpc', 'cpm', 'cpa', 'youtube', 'cpp', 'tg', 'social'
@@ -55,6 +55,7 @@ order by
 	utm_source, 
 	utm_medium, 
 	utm_campaign
+
 	
 
 
