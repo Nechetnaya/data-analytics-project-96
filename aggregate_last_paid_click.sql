@@ -22,11 +22,14 @@ with tab as (
                 source,
                 medium,
                 campaign,
-                max(visit_date) over (partition by visitor_id) as last_visit
+                row_number () over (
+                	partition by visitor_id
+                	order by visit_date desc
+                	) as last_visit
             from sessions
             where medium != 'organic'
         ) as s
-    where visit_date = last_visit
+    where last_visit = 1
 ),
 last_paid_click as (
     select
@@ -57,7 +60,7 @@ ad_cost as (
         utm_source,
         utm_medium,
         utm_campaign,
-        round(sum(daily_spent)) as total_cost
+        sum(daily_spent) as total_cost
     from ya_ads
     group by 1, 2, 3, 4
     union
@@ -76,7 +79,7 @@ select
     lpc.utm_source,
     lpc.utm_medium,
     lpc.utm_campaign,
-    a.total_cost,
+    a.total_cost::INT,
     count(lead_id) as leads_count,
     count(lead_id) filter (where status_id = 142) as purchases_count,
     sum(amount) filter (where status_id = 142) as revenue
