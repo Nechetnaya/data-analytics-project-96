@@ -72,11 +72,11 @@ ad_cost as (
 )
 select
     date(visit_date) as visit_date,
+    count(visitor_id) as visitors_count,
     lpc.utm_source,
     lpc.utm_medium,
     lpc.utm_campaign,
-    avg(a.total_cost) as total_cost,
-    count(visitor_id) as visitors_count,
+    a.total_cost,
     count(lead_id) as leads_count,
     count(lead_id) filter (where status_id = 142) as purchases_count,
     sum(amount) filter (where status_id = 142) as revenue
@@ -87,7 +87,7 @@ from last_paid_click as lpc left join
         and lpc.utm_source = a.utm_source
         and lpc.utm_campaign = a.utm_campaign
         and date(lpc.visit_date) = a.campaign_date
-group by 1, 2, 3, 4
+group by 1, 3, 4, 5, 6
 order by
     revenue desc nulls last,
     visit_date asc,
