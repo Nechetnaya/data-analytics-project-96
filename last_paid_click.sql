@@ -26,7 +26,7 @@ with tab as (
 )
 
 select
-	t.visitor_id,
+    t.visitor_id,
     t.visit_date,
     t.source as utm_source,
     t.medium as utm_medium,
@@ -37,16 +37,11 @@ select
     l.closing_reason,
     l.status_id
 from
-	tab as t left join 
+    tab as t left join
 	leads as l on t.visitor_id = l.visitor_id
 order by
 	l.amount desc nulls last,
 	t.visit_date,
-	utm_source, 
-	utm_medium, 
-	utm_campaign
-
-
-
-	
-	
+	t.source, 
+	t.medium, 
+	t.campaign
