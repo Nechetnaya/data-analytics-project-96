@@ -1,12 +1,3 @@
---visit_date — дата визита
---utm_source / utm_medium / utm_campaign — метки пользователя
---visitors_count — количество визитов в этот день с этими метками
---total_cost — затраты на рекламу
---leads_count — количество лидов, которые оставили визиты, кликнувшие в этот день с этими метками
---purchases_count — количество успешно закрытых лидов (closing_reason = “Успешно реализовано” или status_code = 142)
---revenue — деньги с успешно закрытых лидов
-
-
 with tab as (
     select
         visitor_id,
@@ -31,6 +22,7 @@ with tab as (
         ) as s
     where last_visit = 1
 ),
+
 last_paid_click as (
     select
         t.visitor_id,
@@ -54,6 +46,7 @@ last_paid_click as (
         utm_medium asc,
         utm_campaign asc
 ),
+
 ad_cost as (
     select
         date(campaign_date) as campaign_date,
@@ -73,6 +66,7 @@ ad_cost as (
     from vk_ads
     group by 1, 2, 3, 4
 )
+
 select
     date(visit_date) as visit_date,
     count(visitor_id) as visitors_count,
@@ -96,3 +90,4 @@ order by
     visit_date asc,
     visitors_count desc,
     utm_source asc, utm_medium asc, utm_campaign asc
+    
