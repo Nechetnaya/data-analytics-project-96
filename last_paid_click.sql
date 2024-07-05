@@ -1,13 +1,3 @@
-/**visitor_id — уникальный человек на сайте
-visit_date — время визита
-utm_source / utm_medium / utm_campaign — метки c учетом модели атрибуции
-lead_id — идентификатор лида, если пользователь сконвертился в лид после(во время) визита, NULL — если пользователь не оставил лид
-created_at — время создания лида, NULL — если пользователь не оставил лид
-amount — сумма лида (в деньгах), NULL — если пользователь не оставил лид
-closing_reason — причина закрытия, NULL — если пользователь не оставил лид
-status_id — код причины закрытия, NULL — если пользователь не оставил лид*/
-
-
 with tab as (
     select
         visitor_id,
@@ -23,15 +13,14 @@ with tab as (
                 source,
                 medium,
                 campaign,
-                max(s.visit_date) over (partition by visitor_id) as last_visit
+                max(s.visit_date) over (
+                	partition by visitor_id
+                ) as last_visit
             from sessions as s
             where
                 medium in (
                     'cpc', 'cpa', 'cpm', 'youtube', 'cpp', 'tg', 'social'
-                )
---                or source in (
---                    'cpc', 'cpm', 'cpa', 'youtube', 'cpp', 'tg', 'social'
---                )
+                    )
         ) as s
     where visit_date = last_visit
 )
@@ -50,15 +39,11 @@ from
 	tab as t left join 
 	leads as l on t.visitor_id = l.visitor_id
 order by 
-	amount desc nulls last,
-	visit_date,
+	l.amount desc nulls last,
+	t.visit_date,
 	utm_source, 
 	utm_medium, 
 	utm_campaign
-
-	
-
-
 
 
 

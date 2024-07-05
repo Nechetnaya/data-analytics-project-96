@@ -13,10 +13,10 @@ with tab as (
                 source,
                 medium,
                 campaign,
-                row_number () over (
-                	partition by visitor_id
+                row_number() over (
+					partition by visitor_id
                 	order by visit_date desc
-                	) as last_visit
+                ) as last_visit
             from sessions
             where medium != 'organic'
         ) as s
@@ -30,7 +30,7 @@ last_paid_click as (
         t.source as utm_source,
         t.medium as utm_medium,
         t.campaign as utm_campaign,
-        lead_id,
+        l.lead_id,
         l.amount,
         l.status_id
     from
@@ -40,8 +40,8 @@ last_paid_click as (
             t.visitor_id = l.visitor_id
             and t.visit_date < l.created_at
     order by
-        amount desc nulls last,
-        visit_date asc,
+        l.amount desc nulls last,
+        t.visit_date asc,
         utm_source asc,
         utm_medium asc,
         utm_campaign asc
@@ -55,7 +55,11 @@ ad_cost as (
         utm_campaign,
         sum(daily_spent) as total_cost
     from ya_ads
-    group by 1, 2, 3, 4
+    group by
+    	date(campaign_date),
+        utm_source,
+        utm_medium,
+        utm_campaign
     union
     select
         date(campaign_date) as campaign_date,
@@ -64,30 +68,55 @@ ad_cost as (
         utm_campaign,
         sum(daily_spent) as total_cost
     from vk_ads
-    group by 1, 2, 3, 4
-)
+    group by
+    	date(campaign_date),
+        utm_source,
+        utm_medium,
+        utm_campaign
+),
 
-select
-    date(visit_date) as visit_date,
-    count(visitor_id) as visitors_count,
-    lpc.utm_source,
-    lpc.utm_medium,
-    lpc.utm_campaign,
-    a.total_cost::INT,
-    count(lead_id) as leads_count,
-    count(lead_id) filter (where status_id = 142) as purchases_count,
-    sum(amount) filter (where status_id = 142) as revenue
-from last_paid_click as lpc left join
-    ad_cost as a
-    on
-        lpc.utm_medium = a.utm_medium
-        and lpc.utm_source = a.utm_source
-        and lpc.utm_campaign = a.utm_campaign
-        and date(lpc.visit_date) = a.campaign_date
-group by 1, 3, 4, 5, 6
-order by
-    revenue desc nulls last,
-    visit_date asc,
-    visitors_count desc,
-    utm_source asc, utm_medium asc, utm_campaign asc
+with s_h as (
+	select
+	    date(lpc.visit_date) as visit_date,
+	    lpc.utm_source,
+	    lpc.utm_medium,
+	    lpc.utm_campaign,
+	    a.total_cost::INT,
+	    count(lpc.visitor_id) as visitors_count,
+	    count(lpc.lead_id) as leads_count,
+	    count(lpc.lead_id) filter (where lpc.status_id = 142) as purchases_count,
+	    sum(lpc.amount) filter (where lpc.status_id = 142) as revenue
+	from last_paid_click as lpc left join
+	    ad_cost as a
+	    on
+	        lpc.utm_medium = a.utm_medium
+	        and lpc.utm_source = a.utm_source
+	        and lpc.utm_campaign = a.utm_campaign
+	        and date(lpc.visit_date) = a.campaign_date
+	group by 
+		date(lpc.visit_date),
+	    lpc.utm_source,
+	    lpc.utm_medium,
+	    lpc.utm_campaign,
+	    a.total_cost::INT
+)
     
+select 
+	visit_date,
+	visitors_count,
+	utm_source,
+	utm_medium,
+	utm_campaign,
+	total_cost,
+	leads_count,
+	purchases_count,
+	revenue
+from s_h
+order by
+	revenue desc nulls last,
+	visit_date asc,
+	visitors_count desc,
+	utm_source asc, 
+	utm_medium asc, 
+	utm_campaign asc
+	
