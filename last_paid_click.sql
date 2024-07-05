@@ -39,13 +39,7 @@ from
     leads as l on t.visitor_id = l.visitor_id
 order by
     l.amount desc nulls last,
-    t.visit_date,
-    t.source,
-    t.medium,
-    t.campaign,
-	t.visitor_id,
-	l.lead_id,
-    l.created_at,
-    l.closing_reason,
-    l.status_id
-    
+    t.visit_date asc,
+    t.source asc,
+    t.medium asc,
+    t.campaign asc
